@@ -5,11 +5,34 @@ import javafx.beans.property.SimpleIntegerProperty;
 
 public class GameModel {
 
-    // Usamos Properties para que las etiquetas de la UI se actualicen automáticamente
     private final IntegerProperty score = new SimpleIntegerProperty(0);
     private final IntegerProperty lives = new SimpleIntegerProperty(3);
     private static final int MAX_LIVES = 3;
 
+
+    private double fallSpeed = 2.0;        // velocidad base
+    private final double baseSpeed = 2.0;  // para reiniciar
+    private final double speedIncreasePerSecond = 0.03; // incremento por segundo
+    private final double speedIncreasePerScore = 0.1;   // incremento por cada 10 puntos
+    private long startTime;                 // tiempo de inicio del juego
+
+    public GameModel() {
+        startTime = System.currentTimeMillis();
+    }
+
+
+    public double getFallSpeed() {
+        long elapsed = System.currentTimeMillis() - startTime; // ms
+        double timeSpeed = baseSpeed + (elapsed / 1000.0) * speedIncreasePerSecond;
+        double scoreSpeed = (score.get() / 10.0) * speedIncreasePerScore;
+        fallSpeed = timeSpeed + scoreSpeed;
+
+        fallSpeed = Math.min(fallSpeed, 10.0);
+
+        return fallSpeed;
+    }
+
+    // --- SCORE Y LIVES ---
     public int getScore() { return score.get(); }
     public IntegerProperty scoreProperty() { return score; }
 
@@ -31,5 +54,7 @@ public class GameModel {
     public void resetGame() {
         score.set(0);
         lives.set(MAX_LIVES);
+        fallSpeed = baseSpeed;
+        startTime = System.currentTimeMillis();
     }
 }
